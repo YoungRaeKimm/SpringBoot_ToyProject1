@@ -2,8 +2,10 @@ package com.example.study.repository;
 
 import com.example.study.StudyApplicationTests;
 import com.example.study.model.entity.User;
+import com.sun.tools.javac.util.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
@@ -54,7 +56,18 @@ public class UseRepositoryTest extends StudyApplicationTests {
 
     }
 
+    @Test
+    @Transactional
     public void delete(){
+        Optional<User> user = userRepository.findById(1L);
+
+        assert(user.isPresent());
+
+        user.ifPresent(selectUser ->{
+            userRepository.delete(selectUser);
+        });
+        //Optional<User> deleteUser = userRepository.findById(2L);
+
 
     }
 }
