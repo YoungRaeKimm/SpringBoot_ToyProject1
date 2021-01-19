@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-public class UseRepositoryTest extends StudyApplicationTests {
+public class UserRepositoryTest extends StudyApplicationTests {
 
 
     @Autowired
@@ -33,11 +33,14 @@ public class UseRepositoryTest extends StudyApplicationTests {
     }
 
     @Test
+    @Transactional
     public void read(){
-        Optional<User> user = userRepository.findById(2L);
+        Optional<User> user = userRepository.findById(4L);
 
         user.ifPresent(selectUser ->{
-            System.out.println("user: " + selectUser);
+            selectUser.getOrderDetailList().stream().forEach(detail -> {
+                System.out.println(detail.getItem());
+            });
         });
 
     }
