@@ -20,18 +20,25 @@ public class User {
 
     private String account;
 
+    private String password;
+
+    private String status;
+
     private String email;
 
     private String phoneNumber;
 
-    private LocalDateTime created_at;
+    private LocalDateTime registeredAt;
 
-    private String created_by;
+    private LocalDateTime unregisteredAt;
 
-    private LocalDateTime updated_at;
+    private LocalDateTime createdAt;
 
-    private String updated_by;
+    private String createdBy;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private List<OrderDetail> orderDetailList;
+    private LocalDateTime updatedAt;
+
+    private String updatedBy;
+
+
 }
