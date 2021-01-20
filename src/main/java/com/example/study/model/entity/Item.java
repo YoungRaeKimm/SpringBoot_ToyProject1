@@ -30,7 +30,7 @@ public class Item {
 
     private String brandName;
 
-    private String registered_at;
+    private LocalDateTime registeredAt;
 
     private LocalDateTime unregisteredAt;
 
@@ -41,4 +41,6 @@ public class Item {
     private LocalDateTime updatedAt;
 
     private String updatedBy;
+
+    private Long partnerId;
 }
