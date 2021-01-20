@@ -20,14 +20,15 @@ public class UserRepositoryTest extends StudyApplicationTests {
     @Test
     public void create(){
 
-        String account = "Test01";
-        String password = "Test01";
+        String account = "Test03";
+        String password = "Test03";
         String status = "REGISTERED";
         String email = "Test01@gmail.com";
-        String phoneNumber = "010-1111-2222";
+        String phoneNumber = "010-1111-3333";
         LocalDateTime registeredAt = LocalDateTime.now();
-        LocalDateTime createdAt = LocalDateTime.now();
-        String createdBy = "AdminServer";
+        /*LocalDateTime createdAt = LocalDateTime.now();
+        String createdBy = "AdminServer";*/
+
 
         User user=new User();
         user.setAccount(account);
@@ -36,8 +37,12 @@ public class UserRepositoryTest extends StudyApplicationTests {
         user.setPassword(password);
         user.setEmail(email);
         user.setRegisteredAt(registeredAt);
-        user.setCreatedAt(createdAt);
-        user.setCreatedBy(createdBy);
+
+        //builder pattern
+        User u =User.builder().account(account).password(password).status(status).email(email).build();
+
+        //chain -> when update
+        user.setEmail("fdf").setPassword("df");
 
         User newUser = userRepository.save(user);
 
