@@ -23,8 +23,6 @@ public class OrderDetail {
 
     private LocalDateTime arrivalDate;
 
-    private LocalDateTime orderAt;
-
     private Integer quantity;
 
     private BigDecimal totalPrice;
@@ -39,5 +37,6 @@ public class OrderDetail {
 
     private Long itemId;
 
-    private Long userId;
+    private Long orderGroupId;
+
 }
