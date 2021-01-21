@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import sun.jvm.hotspot.utilities.Assert;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -22,7 +23,7 @@ public class ItemRepositoryTest extends StudyApplicationTests {
         item.setStatus("UNREGISTERED");
         item.setTitle("A100");
         item.setContent("2019년형 ");
-        item.setPrice(100000);
+        item.setPrice(BigDecimal.valueOf(100000));
         item.setBrandName("ssamsung");
         item.setRegisteredAt(LocalDateTime.now());
         item.setCreatedAt(LocalDateTime.now());
