@@ -36,7 +36,7 @@ public class ItemRepositoryTest extends StudyApplicationTests {
 
     @Test
     public void read(){
-        Long id = 1L;
+        Long id = 2L;
 
         Optional<Item> item = itemRepository.findById(id);
         item.ifPresent(i->{

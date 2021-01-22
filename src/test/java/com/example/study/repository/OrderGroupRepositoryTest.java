@@ -1,12 +1,16 @@
 package com.example.study.repository;
 
 import com.example.study.StudyApplicationTests;
+import com.example.study.model.entity.Item;
 import com.example.study.model.entity.OrderGroup;
+import com.example.study.model.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class OrderGroupRepositoryTest extends StudyApplicationTests {
 
@@ -33,4 +37,15 @@ public class OrderGroupRepositoryTest extends StudyApplicationTests {
 
 
     }
+
+
+    @Test
+    @Transactional
+    public void read(){
+
+        Optional<OrderGroup> orderGroup = orderGroupRepository.findById(3L);
+
+        orderGroup.ifPresent(System.out::println);
+    }
+
 }

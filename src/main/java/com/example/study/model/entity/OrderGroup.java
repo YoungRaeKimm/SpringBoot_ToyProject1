@@ -12,9 +12,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
 @Entity
 @ToString(exclude = {"user", "orderDetailList"})
 @EntityListeners(AuditingEntityListener.class)
