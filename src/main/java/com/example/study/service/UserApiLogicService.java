@@ -17,10 +17,7 @@ import java.util.Optional;
 
 @Service
 @Builder
-public class UserApiLogicService implements CrudInterface<UserApiRequest, UserApiResponse>{
-
-    @Autowired
-    private UserRepository userRepository;
+public class UserApiLogicService extends BaseService<UserApiRequest, UserApiResponse,User>{
 
     // 1. request data
     // 2. user 생성
@@ -41,7 +38,7 @@ public class UserApiLogicService implements CrudInterface<UserApiRequest, UserAp
                 .registeredAt(LocalDateTime.now())
                 .build();
 
-        User newUser = userRepository.save(user);
+        User newUser = baseRepository.save(user);
 
         //생성된 데이터 -> userApiResponse return
 
@@ -53,7 +50,7 @@ public class UserApiLogicService implements CrudInterface<UserApiRequest, UserAp
     public Header<UserApiResponse> read(Long id) {
         //id -> repository getOne, getById
 
-        Optional<User> optional = userRepository.findById(id);
+        Optional<User> optional = baseRepository.findById(id);
 
         // user -> userApiResponse return
         return optional
@@ -81,7 +78,7 @@ public class UserApiLogicService implements CrudInterface<UserApiRequest, UserAp
         UserApiRequest userApiRequest = request.getData();
 
         //id를가지고 user 데이터 찾고
-        Optional<User> optional=userRepository.findById(userApiRequest.getId());
+        Optional<User> optional=baseRepository.findById(userApiRequest.getId());
 
         return optional.map(user->{
             // data를 가지고 update
@@ -97,7 +94,7 @@ public class UserApiLogicService implements CrudInterface<UserApiRequest, UserAp
 
             //userApiResponse 만들어주면 됌
         })
-                .map(user->userRepository.save(user))   //update -> newuser
+                .map(user->baseRepository.save(user))   //update -> newuser
                 .map(user->response(user))              //userApiResponse 만듬
                 .orElseGet(()->Header.ERROR("데어터 없음"));
 
@@ -108,11 +105,11 @@ public class UserApiLogicService implements CrudInterface<UserApiRequest, UserAp
     public Header delete(Long id) {
         // id->repository->user
 
-        Optional<User> optional = userRepository.findById(id);
+        Optional<User> optional = baseRepository.findById(id);
 
         //repository ->delete
         return optional.map(user->{
-            userRepository.delete(user);
+            baseRepository.delete(user);
 
             return Header.OK();
         }).orElseGet(()->Header.ERROR("데이터 없음"));
