@@ -1,27 +1,47 @@
 package com.example.study.service;
 
 import com.example.study.ifs.CrudInterface;
+import com.example.study.model.entity.Item;
+import com.example.study.model.entity.OrderGroup;
 import com.example.study.model.entity.User;
 import com.example.study.model.enumClass.UserStatus;
 import com.example.study.model.network.Header;
+import com.example.study.model.network.Pagination;
 import com.example.study.model.network.request.UserApiRequest;
+import com.example.study.model.network.response.ItemApiResponse;
+import com.example.study.model.network.response.OrderGroupApiResponse;
 import com.example.study.model.network.response.UserApiResponse;
+import com.example.study.model.network.response.UserOrderInfoApiResponse;
 import com.example.study.repository.UserRepository;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Builder
-public class UserApiLogicService extends BaseService<UserApiRequest, UserApiResponse,User>{
+public class UserApiLogicService implements CrudInterface<UserApiRequest, UserApiResponse>{
 
     // 1. request data
     // 2. user 생성
     // 3. 생성된 데이터 -> userApiResponse return
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private OrderGroupApiLogicService orderGroupApiLogicService;
+
+    @Autowired
+    private ItemApiLogicService itemApiLogicService;
+
     @Override
     public Header<UserApiResponse> create(Header<UserApiRequest> request) {
 
@@ -38,23 +58,24 @@ public class UserApiLogicService extends BaseService<UserApiRequest, UserApiResp
                 .registeredAt(LocalDateTime.now())
                 .build();
 
-        User newUser = baseRepository.save(user);
+        User newUser = userRepository.save(user);
 
         //생성된 데이터 -> userApiResponse return
 
 
-        return response(newUser);
+        return Header.OK(response(newUser));
     }
 
     @Override
     public Header<UserApiResponse> read(Long id) {
         //id -> repository getOne, getById
 
-        Optional<User> optional = baseRepository.findById(id);
+        Optional<User> optional = userRepository.findById(id);
 
         // user -> userApiResponse return
         return optional
                 .map(user -> response(user))
+                .map(userApiResponse -> Header.OK(userApiResponse))
                 .orElseGet(()->Header.ERROR("데이터 없음"));
 
 
@@ -78,7 +99,7 @@ public class UserApiLogicService extends BaseService<UserApiRequest, UserApiResp
         UserApiRequest userApiRequest = request.getData();
 
         //id를가지고 user 데이터 찾고
-        Optional<User> optional=baseRepository.findById(userApiRequest.getId());
+        Optional<User> optional=userRepository.findById(userApiRequest.getId());
 
         return optional.map(user->{
             // data를 가지고 update
@@ -94,8 +115,9 @@ public class UserApiLogicService extends BaseService<UserApiRequest, UserApiResp
 
             //userApiResponse 만들어주면 됌
         })
-                .map(user->baseRepository.save(user))   //update -> newuser
+                .map(user->userRepository.save(user))   //update -> newuser
                 .map(user->response(user))              //userApiResponse 만듬
+                .map(Header::OK)
                 .orElseGet(()->Header.ERROR("데어터 없음"));
 
 
@@ -105,11 +127,11 @@ public class UserApiLogicService extends BaseService<UserApiRequest, UserApiResp
     public Header delete(Long id) {
         // id->repository->user
 
-        Optional<User> optional = baseRepository.findById(id);
+        Optional<User> optional = userRepository.findById(id);
 
         //repository ->delete
         return optional.map(user->{
-            baseRepository.delete(user);
+            userRepository.delete(user);
 
             return Header.OK();
         }).orElseGet(()->Header.ERROR("데이터 없음"));
@@ -117,7 +139,7 @@ public class UserApiLogicService extends BaseService<UserApiRequest, UserApiResp
         //response return
     }
 
-    private Header<UserApiResponse> response(User user){
+    private UserApiResponse response(User user){
         //user -> userApiResponse
 
         UserApiResponse userApiResponse = UserApiResponse.builder()
@@ -133,6 +155,55 @@ public class UserApiLogicService extends BaseService<UserApiRequest, UserApiResp
 
         //Header + data reuturn
 
-        return Header.OK(userApiResponse);
+        return userApiResponse;
+    }
+
+    public Header<List<UserApiResponse>> search(Pageable pageable){
+        Page<User> users = userRepository.findAll(pageable);
+
+        List<UserApiResponse> userApiResponseList = users.stream()
+                .map(user->response(user))
+                .collect(Collectors.toList());
+
+        Pagination pagination = Pagination.builder()
+                .totalPages(users.getTotalPages())
+                .totalElements(users.getTotalElements())
+                .currentPage(users.getNumber())
+                .currentElements(users.getNumberOfElements())
+                .build();
+
+        return Header.OK(userApiResponseList,pagination);
+    }
+
+    public Header<UserOrderInfoApiResponse> orderInfo(Long id) {
+
+        //user
+        User user = userRepository.getOne(id);
+        UserApiResponse userApiResponse = response(user);
+
+        //orderGroup
+
+        List<OrderGroup> orderGroups = user.getOrderGroupList();
+        List<OrderGroupApiResponse> orderGroupApiResponseList = orderGroups.stream()
+                .map(orderGroup -> {
+                    OrderGroupApiResponse orderGroupApiResponse = orderGroupApiLogicService.response(orderGroup).getData();
+
+                    List<ItemApiResponse> itemApiResponseList = orderGroup.getOrderDetailList().stream()
+                            .map(detail -> detail.getItem())
+                            .map(item -> itemApiLogicService.response(item).getData())
+                            .collect(Collectors.toList());
+
+                    orderGroupApiResponse.setItemApiResponseList(itemApiResponseList);
+                    return orderGroupApiResponse;
+                })
+                .collect(Collectors.toList());
+
+        userApiResponse.setOrderGroupApiResponseList(orderGroupApiResponseList);
+
+        UserOrderInfoApiResponse userOrderInfoApiResponse = UserOrderInfoApiResponse.builder()
+                .userApiResponse(userApiResponse)
+                .build();
+
+        return Header.OK(userOrderInfoApiResponse);
     }
 }

@@ -23,6 +23,8 @@ public class Header<T> {
     private String resultCode;
 
 
+    private Pagination pagination;
+
     //api 부가설명
     private String description;
 
@@ -49,6 +51,18 @@ public class Header<T> {
                 .data(data)
                 .build();
     }
+
+    //data가 들어있는 OK
+    public static <T> Header<T> OK(T data,Pagination pagination){
+        return (Header<T>)Header.builder()
+                .transactionTime(LocalDateTime.now())
+                .resultCode("Ok")
+                .description("OK")
+                .data(data)
+                .pagination(pagination)
+                .build();
+    }
+
 
     //그냥 error
     public static <T> Header<T> ERROR(String description){
